@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-function Clients() {
+function ClientsModal({ isOpen, onClose }) {
     const [formData, setFormData] = useState({
         name: '',
         cpf: '',
@@ -31,12 +31,13 @@ function Clients() {
             toast.success('Cliente criado com sucesso!');
             setTimeout(() => {
                 navigate('/');
-            }, 2000); // Atraso de 2 segundos
+                onClose();
+            }, 2000);
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 if (error.response?.status === 422) {
-                    setErrorMessage('Email já existe!');
-                    toast.error('Email já existe!');
+                    setErrorMessage('CPF já existe!');
+                    toast.error('CPF já existe!');
                 } else if (error.response?.status === 409) {
                     const errorData = error.response?.data;
                     if (errorData?.email) {
@@ -57,19 +58,24 @@ function Clients() {
         }
     };
 
+    if (!isOpen) return null;
+
     return (
-        <section className="flex flex-col items-center justify-center h-screen">
-            <h1 className="text-4xl font-bold mb-4 text-white">Novo cliente</h1>
-            <form className="flex flex-col items-center justify-center gap-4 bg-gray-800 p-4 rounded-md w-1/2 h-1/2" onSubmit={handleSubmit}>
-                <input className="bg-gray-200 border border-gray-700 text-black p-2 w-full rounded-md" type="text" name="name" placeholder="Nome" onChange={handleChange} value={formData.name} />
-                <InputMask mask="999.999.999-99" className="bg-gray-200 border border-gray-700 text-black p-2 w-full rounded-md" type="text" name="cpf" placeholder="CPF" onChange={handleChange} />
-                <input className="bg-gray-200 border border-gray-700 text-black p-2 w-full rounded-md" type="text" name="email" placeholder="Email" onChange={handleChange} />
-                <InputMask mask="(99) 99999-9999" className="bg-gray-200 border border-gray-700 text-black p-2 w-full rounded-md" type="text" name="phone" placeholder="Telefone" onChange={handleChange} />
-                <button className="bg-orange-500 text-white p-4 rounded-md w-1/2" type="submit">Criar</button>
-            </form>
-            <ToastContainer />
-        </section>
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center">
+            <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-lg">
+                <h1 className="text-3xl font-semibold mb-6 text-center text-orange-500">Novo Cliente</h1>
+                <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
+                    <input className="bg-gray-100 border border-gray-300 text-black p-3 w-full rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" type="text" name="name" placeholder="Nome" onChange={handleChange} value={formData.name} />
+                    <InputMask mask="999.999.999-99" className="bg-gray-100 border border-gray-300 text-black p-3 w-full rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" type="text" name="cpf" placeholder="CPF" onChange={handleChange} />
+                    <input className="bg-gray-100 border border-gray-300 text-black p-3 w-full rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" type="text" name="email" placeholder="Email" onChange={handleChange} />
+                    <InputMask mask="(99) 99999-9999" className="bg-gray-100 border border-gray-300 text-black p-3 w-full rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" type="text" name="phone" placeholder="Telefone" onChange={handleChange} />
+                    <button className="bg-orange-500 text-white p-3 rounded-lg w-full hover:bg-orange-600 transition duration-300" type="submit">Criar</button>
+                </form>
+                <button className="mt-6 bg-red-500 text-white p-3 rounded-lg w-full hover:bg-red-600 transition duration-300" onClick={onClose}>Fechar</button>
+                <ToastContainer />
+            </div>
+        </div>
     );
 }
 
-export default Clients;
+export default ClientsModal;

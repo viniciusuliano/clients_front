@@ -6,6 +6,7 @@ import InputMask from 'react-input-mask';
 import { useNavigate } from 'react-router-dom'; 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import ClientsModal from '../Clients'; 
 
 interface Client {
     id: number;
@@ -21,31 +22,21 @@ function Home() {
     const clientsPerPage = 10; 
     const [searchTerm, setSearchTerm] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
-        axios.get('http://127.0.0.1:8000/api/client')
-            .then(response => {
+        const fetchAllClients = async () => {
+            try {
+                const response = await axios.get('http://127.0.0.1:8000/api/client');
                 setClients(response.data);
-            })
-            .catch(error => {
+            } catch (error) {
                 console.error('There was an error fetching the clients!', error);
-            });
-    }, []);
+            }
+        };
 
-    useEffect(() => {
-        if (searchTerm.trim() === '') {
-            const fetchAllClients = async () => {
-                try {
-                    const response = await axios.get('http://127.0.0.1:8000/api/client');
-                    setClients(response.data);
-                } catch {
-                    console.error('There was an error fetching the clients!');
-                }
-            };
-            fetchAllClients();
-        }
-    }, [searchTerm]);
+        fetchAllClients();
+    }, []);
 
     const indexOfLastClient = currentPage * clientsPerPage;
     const indexOfFirstClient = indexOfLastClient - clientsPerPage;
@@ -87,8 +78,8 @@ function Home() {
             <div className="w-full max-w-4xl">
                 <div className="flex items-center justify-center mt-4 gap-4">
                     <button 
-                        className="bg-white text-black px-4 py-2 rounded-full w-10 h-10"
-                        onClick={() => navigate('/clients')}
+                        className="bg-white text-black px-4 py-2 rounded-full w-10 h-10 hover:bg-gray-200"
+                        onClick={() => setIsModalOpen(true)} // Open modal on button click
                     >
                         + 
                     </button>
@@ -136,10 +127,10 @@ function Home() {
                                 </td>
                                 <td className="px-4 py-2 flex gap-2">
                                     <button onClick={() => navigate(`/edit/${client.id}`)}>
-                                        <FontAwesomeIcon icon={faEdit} className="text-blue-500" />
+                                        <FontAwesomeIcon icon={faEdit} className="text-blue-500 hover:scale-110" />
                                     </button>
                                     <button onClick={() => handleDelete(client.id)}>
-                                        <FontAwesomeIcon icon={faTrash} className="text-red-500" />
+                                        <FontAwesomeIcon icon={faTrash} className="text-red-500 hover:scale-110" />
                                     </button>
                                 </td>
                             </tr>
@@ -151,7 +142,7 @@ function Home() {
                         <button
                             key={number}
                             onClick={() => paginate(number + 1)}
-                            className={`px-4 py-2 mx-1 ${currentPage === number + 1 ? 'bg-blue-500' : 'bg-white'} text-black rounded-full`}
+                            className={`px-4 py-2 mx-1 ${currentPage === number + 1 ? 'bg-blue-500' : 'bg-white'} text-black rounded-full hover:bg-gray-200`}
                         >
                             {number + 1}
                         </button>
@@ -159,6 +150,7 @@ function Home() {
                 </div>
                 <ToastContainer />
             </div>
+            <ClientsModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
         </section>
     );
 }
