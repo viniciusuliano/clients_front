@@ -3,10 +3,12 @@ import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faTrash, faEdit } from '@fortawesome/free-solid-svg-icons';
 import InputMask from 'react-input-mask';
-import { useNavigate } from 'react-router-dom'; 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ClientsModal from '../Clients'; 
+import ConfirmationModal from '../../components/ConfirmationModal'; // Import the modal component
+import UpdateClientModal from '../../components/ui/updateClientModal'; // Import the update client modal
+import { ClientData } from '../../types/ClientData';
 
 interface Client {
     id: number;
@@ -16,6 +18,8 @@ interface Client {
     phone: string;
 }
 
+type NewClient = Omit<Client, 'id'>;
+
 function Home() {
     const [clients, setClients] = useState<Client[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -23,18 +27,22 @@ function Home() {
     const [searchTerm, setSearchTerm] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const navigate = useNavigate();
+    const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
+    const [clientToDelete, setClientToDelete] = useState<number | null>(null);
+    const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+    const [clientToEdit, setClientToEdit] = useState<number | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+
+    const fetchAllClients = async () => {
+        try {
+            const response = await axios.get('http://127.0.0.1:8000/api/client');
+            setClients(response.data);
+        } catch (error) {
+            console.error('There was an error fetching the clients!', error);
+        }
+    };
 
     useEffect(() => {
-        const fetchAllClients = async () => {
-            try {
-                const response = await axios.get('http://127.0.0.1:8000/api/client');
-                setClients(response.data);
-            } catch (error) {
-                console.error('There was an error fetching the clients!', error);
-            }
-        };
-
         fetchAllClients();
     }, []);
 
@@ -46,6 +54,7 @@ function Home() {
 
     const handleSearch = async (term: string) => {
         if (term.trim() === '') {
+            fetchAllClients();
             setErrorMessage('');
             return;
         }
@@ -56,30 +65,84 @@ function Home() {
                 throw new Error('Erro ao buscar cliente');
             }
             const cliente = await response.json();
+            if (!cliente) {
+                toast.error('Cliente não encontrado');
+                setErrorMessage('Cliente não encontrado');
+                return;
+            }
             setClients([cliente]);
             setErrorMessage('');
         } catch {
             toast.error('Cliente não encontrado');
+            setErrorMessage('Cliente não encontrado');
+            console.log(errorMessage);
         }
     };
 
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(() => {
+            handleSearch(searchTerm);
+        }, 500);
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [searchTerm]);
+
     const handleDelete = async (clientId: number) => {
+        setClientToDelete(clientId);
+        setIsConfirmationOpen(true);
+    };
+
+    const confirmDelete = async () => {
+        if (clientToDelete === null) return;
+
         try {
-            await axios.delete(`http://127.0.0.1:8000/api/client/${clientId}`);
-            setClients(clients.filter(client => client.id !== clientId));
+            await axios.delete(`http://127.0.0.1:8000/api/client/${clientToDelete}`);
+            setClients(clients.filter(client => client.id !== clientToDelete));
             toast.success('Cliente deletado com sucesso!');
         } catch {
             toast.error('Erro ao deletar cliente');
+        } finally {
+            setIsConfirmationOpen(false);
+            setClientToDelete(null);
+        }
+    };
+
+    const handleCreateClient = async (newClient: NewClient) => {
+        try {
+            const response = await axios.post('http://127.0.0.1:8000/api/client', newClient);
+            setClients(prevClients => [...prevClients, response.data]);
+            toast.success('Cliente criado com sucesso!');
+        } catch {
+            toast.error('Erro ao criar cliente');
+        }
+    };
+
+    const handleUpdateClient = async (updatedClient: ClientData) => {
+        setIsLoading(true);
+        try {
+            await axios.put(`http://127.0.0.1:8000/api/client/${clientToEdit}`, updatedClient);
+            setClients(prevClients => 
+                prevClients.map(client => 
+                    client.id === clientToEdit ? { ...client, ...updatedClient } : client
+                )
+            );
+            toast.success('Cliente atualizado com sucesso!');
+        } catch {
+            toast.error('Erro ao atualizar cliente');
+        } finally {
+            setIsLoading(false);
+            setIsUpdateModalOpen(false);
         }
     };
 
     return (
         <section className="flex justify-center">
             <div className="w-full max-w-4xl">
+                {isLoading && <div className="loading-spinner">Loading...</div>}
                 <div className="flex items-center justify-center mt-4 gap-4">
                     <button 
                         className="bg-white text-black px-4 py-2 rounded-full w-10 h-10 hover:bg-gray-200"
-                        onClick={() => setIsModalOpen(true)} // Open modal on button click
+                        onClick={() => setIsModalOpen(true)} 
                     >
                         + 
                     </button>
@@ -88,20 +151,12 @@ function Home() {
                         placeholder="Pesquisar clientes"
                         className="bg-transparent border rounded-full text-white w-96 h-10"
                         value={searchTerm}
-                        onChange={(e) => {
-                            setSearchTerm(e.target.value);
-                            handleSearch(e.target.value);
-                        }}
+                        onChange={(e) => setSearchTerm(e.target.value)}
                     />
                     <button onClick={() => handleSearch(searchTerm)}>
                         <FontAwesomeIcon icon={faSearch} className="mr-2 text-white" />
                     </button>
                 </div>
-                {errorMessage && (
-                    <div className="text-red-500 text-center mt-4">
-                        {errorMessage}
-                    </div>
-                )}
                 <table className="min-w-full bg-transparent mt-4">
                     <thead>
                         <tr>
@@ -126,7 +181,10 @@ function Home() {
                                     <InputMask mask="(99) 99999-9999" value={client.phone} disabled className="bg-transparent border-none text-white" />
                                 </td>
                                 <td className="px-4 py-2 flex gap-2">
-                                    <button onClick={() => navigate(`/edit/${client.id}`)}>
+                                    <button onClick={() => {
+                                        setClientToEdit(client.id);
+                                        setIsUpdateModalOpen(true);
+                                    }}>
                                         <FontAwesomeIcon icon={faEdit} className="text-blue-500 hover:scale-110" />
                                     </button>
                                     <button onClick={() => handleDelete(client.id)}>
@@ -150,7 +208,25 @@ function Home() {
                 </div>
                 <ToastContainer />
             </div>
-            <ClientsModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+            <ClientsModal 
+                isOpen={isModalOpen} 
+                onClose={() => setIsModalOpen(false)} 
+                onCreate={handleCreateClient} 
+            />
+            <ConfirmationModal
+                isOpen={isConfirmationOpen}
+                onClose={() => setIsConfirmationOpen(false)}
+                onConfirm={confirmDelete}
+                message="Tem certeza que deseja deletar este cliente?"
+            />
+            {isUpdateModalOpen && clientToEdit !== null && (
+                <UpdateClientModal
+                    clientId={clientToEdit}
+                    isOpen={isUpdateModalOpen}
+                    onUpdate={handleUpdateClient}
+                    onClose={() => setIsUpdateModalOpen(false)}
+                />
+            )}
         </section>
     );
 }

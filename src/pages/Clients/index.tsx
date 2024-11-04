@@ -4,8 +4,15 @@ import InputMask from 'react-input-mask';
 import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { Client } from '../../types/NewClient';
 
-function ClientsModal({ isOpen, onClose }) {
+interface ClientsModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    onCreate: (newClient: Client) => Promise<void>;
+}
+
+function ClientsModal({ isOpen, onClose }: ClientsModalProps) {
     const [formData, setFormData] = useState({
         name: '',
         cpf: '',
@@ -14,6 +21,7 @@ function ClientsModal({ isOpen, onClose }) {
     });
     const [errorMessage, setErrorMessage] = useState('');
     const navigate = useNavigate();
+    console.log(errorMessage);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({
