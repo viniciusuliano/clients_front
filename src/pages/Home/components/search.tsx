@@ -3,7 +3,7 @@ import { LuSearch } from "react-icons/lu";
 import { InputGroup } from "../../../components/ui/input-group";
 function SearchBar(){
     return (
-        <InputGroup w="1/2" bg="primary" startElement={<LuSearch/>}>      
+        <InputGroup w="full" bg="primary" startElement={<LuSearch/>}>      
             <Input w="full" placeholder="Pesquisar clientes" />
         </InputGroup>
     )

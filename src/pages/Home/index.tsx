@@ -1,5 +1,6 @@
 import SearchBar from "./components/search"
 import TableHome from "./components/table-home"
+import { FaUserPlus } from "react-icons/fa";
 import FormCreateClient from "./components/form-create-client"
 import { Button, Flex, HStack, Stack, } from "@chakra-ui/react"
 import {
@@ -14,9 +15,11 @@ function Home(){
   const [isOpen, setIsOpen] = useState(false);
   return (
     <Flex w="full" h="100vh" justify="start" align="center" direction="column" bg="blackAlpha.100" p={10}>
-        <Flex w="full" justify="space-around">
-          <Button colorScheme="green" onClick={() => setIsOpen(true)}>Cadastrar Cliente</Button>
-          <SearchBar />
+        <Flex w="full" gap={4}>
+          <Button ml={4} color="green.500" onClick={() => setIsOpen(true)}>
+            <FaUserPlus />
+          </Button>
+          <SearchBar/>
         </Flex>
         <Flex w="full">
           <TableHome />

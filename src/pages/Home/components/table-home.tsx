@@ -3,6 +3,7 @@ import axios from "axios";
 import { HiTrash } from "react-icons/hi";
 import { GoPencil } from "react-icons/go";
 import {useEffect, useState} from "react";
+import { MdOutlineAttachMoney } from "react-icons/md";
 
 interface Client {
   id: number;
@@ -38,12 +39,13 @@ function TableHome(){
 <Stack w="full" mt={10}>
           <Table.Root>
             <Table.Header>
-              <Table.Row>
+              <Table.Row h="100px">
                 <Table.ColumnHeader>Nome</Table.ColumnHeader>
                 <Table.ColumnHeader>Email</Table.ColumnHeader>
                 <Table.ColumnHeader>Telefone</Table.ColumnHeader>
                 <Table.ColumnHeader>CPF</Table.ColumnHeader>
                 <Table.ColumnHeader>Ações</Table.ColumnHeader>
+                <Table.ColumnHeader>Financeiro</Table.ColumnHeader>
               </Table.Row>
             </Table.Header>
             <Table.Body>
@@ -56,6 +58,9 @@ function TableHome(){
                   <Table.Cell w="full" display="flex" gap={2}>
                     <Button color="yellow.500"><GoPencil /></Button>
                     <Button color="red.500"><HiTrash /></Button>
+                </Table.Cell>
+                <Table.Cell>
+                  <Button color="green.500"><MdOutlineAttachMoney /></Button>
                 </Table.Cell>
               </Table.Row>
               ))}

@@ -13,13 +13,13 @@ function CreateClient(){
         axios.create({
             baseURL: "http://127.0.0.1:8000/api/client"
         })
-        toaster.create({
+        toaster.success({
             title: `Cliente cadastrado com sucesso`,
             type: "success",
         })
     } catch (error) {
         console.error(error);
-        toaster.create({
+        toaster.error({
             title: `Erro ao cadastrar cliente`,
             type: "error",
         })
