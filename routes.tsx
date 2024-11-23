@@ -2,6 +2,7 @@ import { createBrowserRouter } from 'react-router-dom';
 
 import Home from './src/pages/Home/index';
 import Clients from './src/pages/Clients/index';
+import Accounts from './src/pages/Accounts/index';
 
 export const router = createBrowserRouter([
     {
@@ -16,6 +17,10 @@ export const router = createBrowserRouter([
         path: '/clients',
         element: <Clients />,
     },
+    {
+        path:'/accounts',
+        element: <Accounts />,
+    }
 ]);
 
 export default router;

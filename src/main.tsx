@@ -1,10 +1,11 @@
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
-import { Provider } from './components/ui/provider'
+import { ChakraProvider } from '@chakra-ui/react'
+import system from './styles/theme.ts'
 
 createRoot(document.getElementById('root')!).render(
-    <Provider>
-        <App />
-  </Provider>
+    <ChakraProvider value={system}>
+      <App />
+  </ChakraProvider>
 )
