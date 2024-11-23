@@ -5,11 +5,6 @@
     { "path": "./tsconfig.node.json" }
   ],
     "compilerOptions": {
-      "module": "ESNext",
-      "moduleResolution": "Bundler",
-      "skipLibCheck": true,
-      "paths": {
-        "@/*": ["./src/*"]
-      }
+        "jsx": "react-jsx"
     }
 }

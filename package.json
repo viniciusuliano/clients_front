@@ -10,12 +10,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@chakra-ui/react": "^3.0.2",
-    "@emotion/react": "^11.13.3",
+    "@chakra-ui/react": "^3.2.0",
+    "@chakra-ui/theme-utils": "^2.0.21",
+    "@emotion/react": "^11.13.5",
+    "@emotion/styled": "^11.13.5",
     "@fortawesome/free-solid-svg-icons": "^6.6.0",
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@types/react-router-dom": "^5.3.3",
     "axios": "^1.7.7",
+    "framer-motion": "^11.11.17",
     "next-themes": "^0.3.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
