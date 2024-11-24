@@ -2,8 +2,10 @@ import { Button, Stack, Table } from "@chakra-ui/react";
 import axios from "axios";
 import { HiTrash } from "react-icons/hi";
 import { GoPencil } from "react-icons/go";
-import {useEffect, useState} from "react";
+import {useEffect, useState, useCallback} from "react";
 import { MdOutlineAttachMoney } from "react-icons/md";
+import DeleteClient from "./delete-client";
+
 
 interface Client {
   id: number;
@@ -14,27 +16,26 @@ interface Client {
 }
 
 function TableHome(){
-
-  const getAllClients = async () => {
-    try {
-      const response = await axios.get("http://127.0.0.1:8000/api/client");
-      return response.data;
-    } catch (error) {
-      console.error(error);
-    }
-  }
   
-  const [clientes, setClientes] = useState<Client[]>([]);
+  const [clientes, setClientes] = useState<Client[]>([])  
+  const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
 
-  useEffect(() => {
-    const fetchClients = async () => {
-      const response = await getAllClients();
-      setClientes(response);
-    };
-    
-    fetchClients();
+  const getAllClients = useCallback( async () => {
+    try{
+      const response = await axios.get<Client[]>("http://127.0.0.1:8000/api/client")
+      if(!response){
+        throw new Error("Erro na requisição")
+      }
+      setClientes(response.data)
+    }catch(error){
+      console.error(error)
+    }
   }, []);
 
+  useEffect(() => {
+    getAllClients()
+  }, [getAllClients])
+  
   return (
 <Stack w="full" mt={10}>
           <Table.Root>
@@ -57,7 +58,12 @@ function TableHome(){
                   <Table.Cell>{cliente.cpf}</Table.Cell>
                   <Table.Cell w="full" display="flex" gap={2}>
                     <Button color="yellow.500"><GoPencil /></Button>
-                    <Button color="red.500"><HiTrash /></Button>
+                    <Button 
+                      color="red.500" 
+                      onClick={() => setSelectedClientId(cliente.id)}
+                    >
+                      <HiTrash />
+                    </Button>
                 </Table.Cell>
                 <Table.Cell>
                   <Button color="green.500"><MdOutlineAttachMoney /></Button>
@@ -66,8 +72,15 @@ function TableHome(){
               ))}
             </Table.Body>
           </Table.Root>
-        </Stack>
-    )       
+
+          {selectedClientId && (
+            <DeleteClient 
+              id={selectedClientId} 
+              onClose={() => setSelectedClientId(null)}
+            />
+          )}
+      </Stack>
+  )       
 }
 
 export default TableHome;

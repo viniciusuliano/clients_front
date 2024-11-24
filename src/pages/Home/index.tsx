@@ -2,7 +2,7 @@ import SearchBar from "./components/search"
 import TableHome from "./components/table-home"
 import { FaUserPlus } from "react-icons/fa";
 import FormCreateClient from "./components/form-create-client"
-import { Button, Flex, HStack, Stack, } from "@chakra-ui/react"
+import { Button, Flex, HStack, Stack} from "@chakra-ui/react"
 import {
   PaginationItems,
   PaginationNextTrigger,
@@ -22,7 +22,7 @@ function Home(){
           <SearchBar/>
         </Flex>
         <Flex w="full">
-          <TableHome />
+          <TableHome  />
         </Flex>
         <Stack w="full" align="end">
           <PaginationRoot count={10} pageSize={10} page={1} mt={10}>
@@ -33,7 +33,7 @@ function Home(){
             </HStack>
           </PaginationRoot>
         </Stack>
-        <FormCreateClient isOpen={isOpen} onClose={() => setIsOpen(false)} />
+        <FormCreateClient isOpen={isOpen} onClose={() => setIsOpen(false)}/>
     </Flex>
   )
 }
